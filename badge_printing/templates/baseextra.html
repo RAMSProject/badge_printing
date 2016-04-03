@@ -1,0 +1,16 @@
+{% if c.HAS_PEOPLE_ACCESS %}
+<script type="text/javascript">
+    $(function() {
+        if (window.MENU) {
+            window.MENU.push({
+                'Badge Printing': [
+                    {'List Printed Badges': '../badge_printing/'},
+                    {'List Pending Badges': '../badge_printing/index?pending=True'},
+                    {'Print Adult Badges':  '../badge_printing/print_badges'},
+                    {'Print Minor Badges':  '../badge_printing/print_badges?minor=True'}
+                ]
+            })
+        }
+    });
+</script>
+{% endif %}

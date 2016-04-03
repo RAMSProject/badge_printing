@@ -1,0 +1,14 @@
+{% if c.PAGE_PATH == '/registration/form' %}
+    <script type="text/javascript">
+        $(function () {
+            $('#print_pending').insertAfter($.field('badge_status').parents('.form-group'));
+        });
+    </script>
+
+    <div id="print_pending" class="form-group">
+        <label for="print_pending" class="col-sm-2 control-label">Ready to Print</label>
+        <div class="col-sm-6">
+            {% checkbox attendee.print_pending %}
+        </div>
+    </div>
+{% endif %}
