@@ -1,4 +1,4 @@
-{% if c.PAGE_PATH == '/registration/form' %}
+{% if c.PAGE_PATH == '/registration/form' and attendee.times_printed < 1 or attendee.print_pending %}
     <script type="text/javascript">
         $(function () {
             $('#print_pending').insertAfter($.field('badge_status').parents('.form-group'));

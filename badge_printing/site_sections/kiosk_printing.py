@@ -74,7 +74,7 @@ class Root:
     def reprint_fee(self, session, attendee_id=None, message='', fee_amount=0, reprint_reason='', refund=''):
         attendee = session.attendee(attendee_id)
         fee_amount = int(fee_amount)
-        if not fee_amount and not reprint_reason:
+        if not fee_amount and not reprint_reason and c.BADGE_REPRINT_FEE:
             message = "You must charge a fee or enter a reason for a free reprint!"
         if not fee_amount and refund:
             message = "You can't refund a fee of $0!"
@@ -84,7 +84,7 @@ class Root:
                 attendee.for_review += "Automated message: Badge marked for free reprint by {} on {}. Reason: {}"\
                     .format(session.admin_attendee().full_name,localized_now().strftime('%m/%d, %H:%M'),reprint_reason)
                 message = 'Free reprint recorded and badge sent to printer.'
-                attendee.badge_status = c.COMPLETED_STATUS
+                attendee.print_pending = True
             elif refund:
                 attendee.paid = c.REFUNDED
                 attendee.amount_refunded += fee_amount
@@ -96,6 +96,6 @@ class Root:
                 attendee.for_review += "Automated message: Reprint fee of ${} charged by {} on {}. Reason: {}"\
                     .format(fee_amount, session.admin_attendee().full_name,localized_now().strftime('%m/%d, %H:%M'),reprint_reason)
                 message = 'Reprint fee of ${} charged. Badge sent to printer.'.format(fee_amount)
-                attendee.badge_status = c.COMPLETED_STATUS
+                attendee.print_pending = True
 
-        raise HTTPRedirect('form?id={}&message={}', attendee_id, message)
+        raise HTTPRedirect('../registration/form?id={}&message={}', attendee_id, message)
