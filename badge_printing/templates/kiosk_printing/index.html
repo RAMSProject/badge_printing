@@ -35,7 +35,7 @@
 {% for attendee in badges %}
     <tr bgcolor="{% cycle #FFFFFF,#DDDDDD %}">
         <td id="name_{{ attendee.id }}" style="text-align:left">
-            <a href="form?id={{ attendee.id }}">{{ attendee.last_first }}</a>
+            <a href="../registration/form?id={{ attendee.id }}">{{ attendee.last_first }}</a>
         </td>
         <td><nobr>{{ attendee.badge_type_label }}</nobr></td>
         <td>{{ attendee.badge_num }}</td>
