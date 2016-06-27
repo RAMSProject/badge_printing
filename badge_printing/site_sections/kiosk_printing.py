@@ -5,7 +5,7 @@ class Root:
     def index(self, session, page='1', message='', id=None, pending='', reprint_reason=''):
         if id:
             attendee = session.attendee(id)
-            attendee.badge_status = c.COMPLETED_STATUS
+            attendee.print_pending = True
             attendee.for_review += "Automated message: Badge marked for free reprint by {} on {}. Reason: {}"\
                 .format(session.admin_attendee().full_name,localized_now().strftime('%m/%d, %H:%M'),reprint_reason)
             session.add(attendee)
@@ -13,9 +13,10 @@ class Root:
             message = "Badge marked for re-print!"
 
         if pending:
-            badges = session.query(Attendee).filter(Attendee.print_pending).filter(Attendee.badge_status == c.COMPLETED_STATUS).order_by(Attendee.badge_num).all()
+            badges = session.query(Attendee).filter(Attendee.print_pending).order_by(Attendee.badge_num).all()
         else:
-            badges = session.query(Attendee).filter(not Attendee.print_pending).order_by(Attendee.badge_num).all()
+            badges = session.query(Attendee).filter(Attendee.print_pending == False).filter(Attendee.times_printed > 0)\
+                .filter(Attendee.badge_status == c.COMPLETED_STATUS).order_by(Attendee.badge_num).all()
 
         page = int(page)
         count = len(badges)
@@ -30,15 +31,19 @@ class Root:
             'pending':  pending
         }
 
-    def print_badges(self, session, minor=''):
+    def print_badges(self, session, message='', minor='', **params):
         # TODO: make the minor/not minor distinction AC-only?
-        badge_list = session.query(Attendee).filter(Attendee.print_pending).order_by(Attendee.badge_num).all()
-        badge_list = [row for row in badge_list if row.age_group_conf['min_age'] < 18] if minor else [row for row in badge_list if row.age_group_conf['min_age'] >= 18]
+        badge_list = session.query(Attendee).filter(Attendee.print_pending).order_by(Attendee.badge_num)
+        badge_list = session.filter_badges_for_printing(badge_list, **params)
+        badge_list = [row for row in badge_list.all() if row.age_group_conf['min_age'] < 18] if minor else [row for row in badge_list.all() if row.age_group_conf['min_age'] >= 18]
 
         try:
             attendee = badge_list.pop(0)
         except IndexError:
-            raise HTTPRedirect('badge_waiting?minor={}'.format(minor))
+            if 'batch_printing' in params:
+                raise HTTPRedirect('index?message={}'.format("No badges ready to print with those parameters!"))
+            else:
+                raise HTTPRedirect('badge_waiting?minor={}'.format(minor))
 
         ribbon_and_or_badge_type = attendee.ribbon_and_or_badge.split(' / ')
         if len(ribbon_and_or_badge_type) > 1:
@@ -62,13 +67,16 @@ class Root:
             'badge_num': attendee.badge_num,
             'badge_name': attendee.badge_printed_name,
             'badge': True,
-            'minor': minor
+            'message': message,
+            'minor': minor,
+            'params': params
         }
 
-    def badge_waiting(self, message='', minor=''):
+    def badge_waiting(self, message='', minor='', badge_type=''):
         return {
             'message': message,
-            'minor': minor
+            'minor': minor,
+            'badge_type': badge_type
         }
 
     def reprint_fee(self, session, attendee_id=None, message='', fee_amount=0, reprint_reason='', refund=''):

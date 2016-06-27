@@ -21,3 +21,21 @@ class Attendee:
     @cost_property
     def reprint_cost(self):
         return c.BADGE_REPRINT_FEE
+
+@Session.model_mixin
+class SessionMixin:
+    def filter_badges_for_printing(self, badge_list, **params):
+        """
+        Allows batch printing by grouping badges via the passed-in parameters.
+
+        :return:
+        """
+
+        if 'badge_type' in params:
+            return badge_list.filter(Attendee.badge_type == params['badge_type'])
+        elif 'dealer_only' in params:
+            return badge_list.filter(Attendee.ribbon.in_([c.DEALER_RIBBON, c.DEALER_ASST_RIBBON]))
+        elif 'badge_upgrade' in params:
+            return badge_list.filter(Attendee.amount_extra == params['badge_upgrade'])
+        else:
+            return badge_list

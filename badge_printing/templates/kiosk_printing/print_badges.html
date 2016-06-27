@@ -5,7 +5,9 @@
         window.print();
 
         // reload to print the next badge
-        setTimeout(function() {window.location = "print_badges?minor={{ minor }}";}, 9000);
+        setTimeout(function() {
+            document.getElementById("next_badge").submit();
+        }, 9000);
     </script>
     <!-- force chrome style for now -->
     <style type="text/css">
@@ -48,8 +50,16 @@ body {margin: 0; padding: 0;}
 <body>
     <div id="container">
         <span id="badge_type">{{ badge_type|safe }}</span>
-        <span id="badge_num">2015-{{ badge_num|stringformat:"04d" }}</span>
+        <span id="badge_num">2016-{{ badge_num|stringformat:"04d" }}</span>
         <span id="badge_name">{{ badge_name }}</span>
     </div>
+
+<form method="post" id="next_badge" action="print_badges" display="none">
+    <input type="hidden" name="minor" value="{{ minor }}"/>
+    {% for param in params.items %}
+        <input type="hidden" name="{{ param.0 }}" value="{{ param.1 }}"/>
+    {% endfor %}
+</form>
+
 </body>
 </html>
