@@ -32,8 +32,9 @@
     <th>Ribbon</th>
     {% if not pending %}<th></th>{% endif %}
 </tr></thead>
+{% set row_color = cycler('#FFFFFF', '#DDDDDD') %}
 {% for attendee in badges %}
-    <tr bgcolor="{% cycle #FFFFFF,#DDDDDD %}">
+    <tr bgcolor="{{ row_color.next() }}">
         <td id="name_{{ attendee.id }}" style="text-align:left">
             <a href="../registration/form?id={{ attendee.id }}">{{ attendee.last_first }}</a>
         </td>

@@ -48,7 +48,7 @@ body {margin: 0; padding: 0;}
 <body>
     <div id="container">
         <span id="badge_type">{{ badge_type|safe }}</span>
-        <span id="badge_num">2015-{{ '{0:04d}'.format(badge_num) }}</span>
+        <span id="badge_num">{{ c.EVENT_YEAR }}-{{ '{0:04d}'.format(badge_num) }}</span>
         <span id="badge_name">{{ badge_name }}</span>
     </div>
 </body>
