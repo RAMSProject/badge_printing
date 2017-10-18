@@ -15,7 +15,7 @@ class Attendee:
     @presave_adjustment
     def print_ready_before_event(self):
         if c.PRE_CON:
-            if self.badge_status == c.COMPLETED_STATUS and self.times_printed < 1:
+            if self.badge_status == c.COMPLETED_STATUS and not self.is_not_ready_to_checkin:
                 self.print_pending = True
 
     @cost_property
