@@ -31,12 +31,15 @@ class Root:
         }
 
     def print_badges(self, session, minor=''):
-        # TODO: make the minor/not minor distinction AC-only?
-        badge_list = session.query(Attendee).filter(Attendee.print_pending).order_by(Attendee.badge_num).all()
-        badge_list = [row for row in badge_list if row.age_group_conf['min_age'] < 18] if minor else [row for row in badge_list if row.age_group_conf['min_age'] >= 18]
+        badge_list = session.query(Attendee)\
+            .filter(Attendee.print_pending, Attendee.birthdate != None, Attendee.badge_num != None)\
+            .order_by(Attendee.badge_num).all()
 
         try:
-            attendee = badge_list.pop(0)
+            if minor:
+                attendee = next(badge for badge in badge_list if badge.age_now_or_at_con < 18)
+            else:
+                attendee = next(badge for badge in badge_list if badge.age_now_or_at_con >= 18)
         except IndexError:
             raise HTTPRedirect('badge_waiting?minor={}'.format(minor))
 

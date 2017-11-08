@@ -21,3 +21,10 @@ class Attendee:
     @cost_property
     def reprint_cost(self):
         return c.BADGE_REPRINT_FEE
+
+    @property
+    def age_now_or_at_con(self):
+        if not self.birthdate:
+            return None
+        day = c.EPOCH.date() if date.today() <= c.EPOCH.date() else sa.localized_now().date()
+        return day.year - self.birthdate.year - ((day.month, day.day) < (self.birthdate.month, self.birthdate.day))
