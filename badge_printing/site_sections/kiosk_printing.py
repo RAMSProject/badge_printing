@@ -40,7 +40,7 @@ class Root:
                 attendee = next(badge for badge in badge_list if badge.age_now_or_at_con < 18)
             else:
                 attendee = next(badge for badge in badge_list if badge.age_now_or_at_con >= 18)
-        except IndexError:
+        except StopIteration:
             raise HTTPRedirect('badge_waiting?minor={}'.format(minor))
 
         ribbon_and_or_badge_type = attendee.ribbon_and_or_badge.split(' / ')
