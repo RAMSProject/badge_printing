@@ -18,6 +18,12 @@ class Attendee:
             if self.badge_status == c.COMPLETED_STATUS and not self.is_not_ready_to_checkin:
                 self.print_pending = True
 
+    @presave_adjustment
+    def print_ready_at_event(self):
+        if c.AT_THE_CON:
+            if self.checked_in and self.times_printed < 1:
+                self.print_pending = True
+
     @cost_property
     def reprint_cost(self):
         return c.BADGE_REPRINT_FEE
