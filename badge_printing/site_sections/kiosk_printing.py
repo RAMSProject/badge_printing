@@ -31,23 +31,11 @@ class Root:
         }
 
     def print_badges(self, session, minor=''):
-        badge_list = session.query(Attendee)\
-            .filter(Attendee.print_pending, Attendee.birthdate != None, Attendee.badge_num != None)\
-            .order_by(Attendee.badge_num).all()
-
-        try:
-            if minor:
-                attendee = next(badge for badge in badge_list if badge.age_now_or_at_con < 18)
-            else:
-                attendee = next(badge for badge in badge_list if badge.age_now_or_at_con >= 18)
-        except StopIteration:
+        attendee = session.get_next_badge_to_print(minor=minor)
+        if not attendee:
             raise HTTPRedirect('badge_waiting?minor={}'.format(minor))
 
-        ribbon_and_or_badge_type = attendee.ribbon_and_or_badge.split(' / ')
-        if len(ribbon_and_or_badge_type) > 1:
-            badge_type = ribbon_and_or_badge_type[0] + "<br />" + ribbon_and_or_badge_type[1]
-        else:
-            badge_type = ribbon_and_or_badge_type[0]
+        badge_type = attendee.badge_type_label
 
         # Allows events to add custom print overrides
         try:
@@ -55,13 +43,11 @@ class Root:
         except:
             pass
 
-        attendee.times_printed += 1
-        attendee.print_pending = False
-        session.add(attendee)
-        session.commit()
+        ribbon = attendee.ribbon_label if attendee.ribbon != c.NO_RIBBON else ''
 
         return {
             'badge_type': badge_type,
+            'ribbon': ribbon,
             'badge_num': attendee.badge_num,
             'badge_name': attendee.badge_printed_name,
             'badge': True,
