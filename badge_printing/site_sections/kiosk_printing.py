@@ -63,7 +63,7 @@ class Root:
     def reprint_fee(self, session, attendee_id=None, message='', fee_amount=0, reprint_reason='', refund=''):
         attendee = session.attendee(attendee_id)
         fee_amount = int(fee_amount)
-        if not fee_amount and not reprint_reason and c.BADGE_REPRINT_FEE:
+        if not fee_amount and not reprint_reason:
             message = "You must charge a fee or enter a reason for a free reprint!"
         if not fee_amount and refund:
             message = "You can't refund a fee of $0!"
