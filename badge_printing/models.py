@@ -1,17 +1,30 @@
-from badge_printing import *
+from uber.models import Session
+from uber.config import c
+from uber.models.types import DefaultColumn as Column
+from sqlalchemy.types import Boolean, Integer
+from uber.decorators import cost_property, presave_adjustment
+from datetime import date
+from uber import utils
+
 
 @Session.model_mixin
 class SessionMixin:
     def get_next_badge_to_print(self, minor=''):
         badge_list = self.query(Attendee) \
-            .filter(Attendee.print_pending, Attendee.birthdate != None, Attendee.badge_num != None) \
-            .order_by(Attendee.badge_num).all()
+            .filter(
+            Attendee.print_pending,
+            Attendee.birthdate != None,
+            Attendee.badge_num != None).order_by(Attendee.badge_num).all()
 
         try:
             if minor:
-                attendee = next(badge for badge in badge_list if badge.age_now_or_at_con < 18)
+                attendee = next(badge for badge
+                                in badge_list
+                                if badge.age_now_or_at_con < 18)
             else:
-                attendee = next(badge for badge in badge_list if badge.age_now_or_at_con >= 18)
+                attendee = next(badge for badge
+                                in badge_list
+                                if badge.age_now_or_at_con >= 18)
         except StopIteration:
             return None
 
@@ -21,6 +34,7 @@ class SessionMixin:
         self.commit()
 
         return attendee
+
 
 @Session.model_mixin
 class Attendee:
@@ -32,12 +46,14 @@ class Attendee:
         if c.AT_THE_CON:
             if self.has_personalized_badge and not self.badge_num:
                 if self.paid != c.NOT_PAID:
-                    self.badge_num = self.session.next_badge_num(self.badge_type, old_badge_num=0)
+                    self.badge_num = self.session\
+                        .next_badge_num(self.badge_type, old_badge_num=0)
 
     @presave_adjustment
     def print_ready_before_event(self):
         if c.PRE_CON:
-            if self.badge_status == c.COMPLETED_STATUS and not self.is_not_ready_to_checkin\
+            if self.badge_status == c.COMPLETED_STATUS\
+                    and not self.is_not_ready_to_checkin\
                     and self.times_printed < 1:
                 self.print_pending = True
 
@@ -55,5 +71,7 @@ class Attendee:
     def age_now_or_at_con(self):
         if not self.birthdate:
             return None
-        day = c.EPOCH.date() if date.today() <= c.EPOCH.date() else sa.localized_now().date()
-        return day.year - self.birthdate.year - ((day.month, day.day) < (self.birthdate.month, self.birthdate.day))
+        day = c.EPOCH.date() if date.today() <= c.EPOCH.date()\
+            else utils.localized_now().date()
+        return day.year - self.birthdate.year - (
+            (day.month, day.day) < (self.birthdate.month, self.birthdate.day))
