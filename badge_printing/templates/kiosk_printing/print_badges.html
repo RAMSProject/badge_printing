@@ -5,7 +5,7 @@
         window.print();
 
         // reload to print the next badge
-        setTimeout(function() {window.location = "print_badges?minor={{ minor }}";}, 9000);
+        setTimeout(function() {window.location = "print_badges?minor={{ minor }}&evenOdd={{ evenOdd }}";}, 9000);
     </script>
     <!-- force chrome style for now -->
     <style type="text/css">
@@ -47,7 +47,7 @@ body {margin: 0; padding: 0;}
 </head>
 <body>
     <div id="container">
-        <span id="badge_type">{{ badge_type|safe }}</span>
+        <span id="badge_type">{{ badge_type|safe }}{{ ribbon|safe }}</span>
         <span id="badge_num">{{ c.EVENT_YEAR }}-{{ '{0:04d}'.format(badge_num) }}</span>
         <span id="badge_name">{{ badge_name }}</span>
     </div>
